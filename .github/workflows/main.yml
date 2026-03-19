@@ -39,7 +39,7 @@ jobs:
               },
               \"fields\": [
                 {
-                  \"name\": \"Quantidade\",
+                  \"name\": \"quantidade\",
                   \"value\": \"${{ steps.count.outputs.total }} arquivos\"
                 }
               ]
