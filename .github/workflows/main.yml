@@ -7,20 +7,14 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Count changed files
         id: count
         run: |
-          total=0
-
-          for row in $(echo '${{ toJson(github.event.commits) }}' | jq -c '.[]'); do
-            added=$(echo "$row" | jq '.added | length')
-            modified=$(echo "$row" | jq '.modified | length')
-            removed=$(echo "$row" | jq '.removed | length')
-
-            total=$((total + added + modified + removed))
-          done
-
-          echo "total=$total" >> $GITHUB_OUTPUT
+          count=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | wc -l)
+          echo "total=$count" >> $GITHUB_OUTPUT
 
       - name: Send to Discord
         run: |
