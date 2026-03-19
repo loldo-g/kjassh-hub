@@ -12,16 +12,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Count changed files
+      - name: Count files
         id: count
         run: |
           count=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | wc -l)
           echo "total=$count" >> $GITHUB_OUTPUT
 
-      - name: Send to Discord
+      - name: Get file list
+        id: files
+        run: |
+          files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$files" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send embed to Discord
         run: |
           curl -H "Content-Type: application/json" \
           -d "{
-            \"content\": \"foram alterados ${{ steps.count.outputs.total }} arquivos neste push\"
+            \"embeds\": [{
+              \"title\": \"arquivos modificados\",
+              \"description\": \"${{ steps.files.outputs.files }}\",
+              \"color\": 16711680,
+              \"thumbnail\": {
+                \"url\": \"https://avatars.githubusercontent.com/u/203347761\"
+              },
+              \"fields\": [
+                {
+                  \"name\": \"Quantidade\",
+                  \"value\": \"${{ steps.count.outputs.total }} arquivos\"
+                }
+              ]
+            }]
           }" \
           ${{ secrets.DISCORD_WEBHOOK }}
